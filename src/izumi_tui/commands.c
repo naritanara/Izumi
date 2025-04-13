@@ -25,6 +25,7 @@
 
 #include <izumi/finder.h>
 
+#include "commands.h"
 #include "files.h"
 #include "window.h"
 
@@ -200,3 +201,29 @@ bool quit_cb(ApplicationData *app_data) {
     app_data->quit_requested = true;
     return true;
 }
+
+MAKE_COMMAND_TREE(PANEL_COMMANDS,
+CMD_NO_ARGS("j", panelcmd_j_cb),
+CMD_NO_ARGS("k", panelcmd_k_cb),
+);
+
+MAKE_COMMAND_TREE(COMMANDS,
+    CMD_ALIAS("n", "newpanel"),
+    CMD_NO_ARGS("newpanel", newpanel_cb),
+    CMD_ALIAS("c", "closepanel"),
+    CMD_ARGLIST("closepanel", closepanel_cb),
+    CMD_ALIAS("ca", "closeallpanels"),
+    CMD_NO_ARGS("closeallpanels", closeallpanels_cb),
+    CMD_ALIAS("o", "open"),
+    CMD_FIXED_ARGLIST("open", 1, open_cb),
+    CMD_SUBCOMMAND("panelcmd", &PANEL_COMMANDS),
+    CMD_FIXED_ARGLIST("set", 2, set_cb),
+    CMD_NO_ARGS("panelsync", panelsync_cb),
+    CMD_NO_ARGS("paneldesync", paneldesync_cb),
+    CMD_FIXED_ARGLIST("findpc", 1, findpc_cb),
+    CMD_FIXED_ARGLIST("findinst", 1, findinst_cb),
+    CMD_NO_ARGS("next", next_cb),
+    CMD_NO_ARGS("prev", prev_cb),
+    CMD_ALIAS("q", "quit"),
+    CMD_NO_ARGS("quit", quit_cb),
+);

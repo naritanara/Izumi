@@ -61,10 +61,10 @@ void split_command_arguments(char * command, int argc, char * argv[]) {
     }
 }
 
-bool traverse_command_tree(ApplicationData *app_data, const Command commands[], size_t commands_length, const char * command_name, int argc, const char * argv[]) {
-    for (unsigned int i = 0; i < commands_length; ++i) {
-        if (strcmp(command_name, commands[i].cmd) != 0) continue;
-        const Command * const command = commands + i;
+bool traverse_command_tree(ApplicationData *app_data, const CommandTree * command_tree, const char * command_name, int argc, const char * argv[]) {
+    for (unsigned int i = 0; i < command_tree->commands_length; ++i) {
+        if (strcmp(command_name, command_tree->commands[i].cmd) != 0) continue;
+        const Command * const command = command_tree->commands + i;
         
         switch (command->type) {
         case COMMAND_TYPE_ARGLIST:
@@ -77,9 +77,10 @@ bool traverse_command_tree(ApplicationData *app_data, const Command commands[], 
             return command->no_args.callback(app_data);
         case COMMAND_TYPE_SUBCOMMAND:
             if (argc == 0) return false;
-            return traverse_command_tree(app_data, command->subcommand.subcommands, command->subcommand.subcommands_length, argv[0], argc - 1, argv + 1);
+            return traverse_command_tree(app_data, command->subcommand.subcommand_tree, argv[0], argc - 1, argv + 1);
         case COMMAND_TYPE_ALIAS:
-            return traverse_command_tree(app_data, command + 1, commands_length - i - 1, command->alias.real_cmd, argc, argv);
+            command_name = command->alias.real_cmd;
+            break;
         }
     }
     
@@ -100,5 +101,5 @@ bool run_command(ApplicationData *app_data) {
     const char * command_name = argv[0];
     const char ** command_argv = (const char **) argv + 1; // argv won't be modified from this point on
     
-    return traverse_command_tree(app_data, COMMANDS, sizeof(COMMANDS) / sizeof(COMMANDS[0]), command_name, argc, command_argv);
+    return traverse_command_tree(app_data, &COMMANDS, command_name, argc, command_argv);
 }

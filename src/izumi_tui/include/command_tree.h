@@ -23,10 +23,9 @@
 
 #include "window.h"
 
-bool run_command(ApplicationData *app_data);
+typedef struct CommandTree_s CommandTree;
 
-struct Command_s;
-typedef struct Command_s Command;
+bool run_command(ApplicationData *app_data);
 
 enum CommandType_e {
     COMMAND_TYPE_ARGLIST,
@@ -64,8 +63,7 @@ struct CommandNoArgs_s {
 typedef struct CommandNoArgs_s CommandNoArgs;
 
 struct CommandSubcommand_s {
-    const Command * subcommands;
-    size_t subcommands_length;
+    const CommandTree * subcommand_tree;
 };
 
 typedef struct CommandSubcommand_s CommandSubcommand;
@@ -88,10 +86,21 @@ struct Command_s {
     };
 };
 
+typedef struct Command_s Command;
+
+struct CommandTree_s {
+    const Command * commands;
+    size_t commands_length;
+};
+
 #define CMD_ARGLIST(cmd, callback)             { cmd, COMMAND_TYPE_ARGLIST, { .arglist = { callback } } }
 #define CMD_FIXED_ARGLIST(cmd, argc, callback) { cmd, COMMAND_TYPE_FIXED_ARGLIST, { .fixed_arglist = { argc, callback } } }
 #define CMD_NO_ARGS(cmd, callback)             { cmd, COMMAND_TYPE_NO_ARGS, { .no_args = { callback } } }
-#define CMD_SUBCOMMAND(cmd, subcommands)       { cmd, COMMAND_TYPE_SUBCOMMAND, { .subcommand = { subcommands, sizeof(subcommands) / sizeof(subcommands[0]) } } }
+#define CMD_SUBCOMMAND(cmd, subcommands)       { cmd, COMMAND_TYPE_SUBCOMMAND, { .subcommand = { subcommands } } }
 #define CMD_ALIAS(cmd, real_cmd)               { cmd, COMMAND_TYPE_ALIAS, { .alias = { real_cmd } } }
+
+#define MAKE_COMMAND_TREE(name, ...) \
+    const Command name##__CMDLIST[] = { __VA_ARGS__ }; \
+    const CommandTree name = { name##__CMDLIST, sizeof(name##__CMDLIST) / sizeof(Command) };
 
 #endif
