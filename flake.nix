@@ -10,10 +10,10 @@
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [ "x86_64-linux" ];
       perSystem = { self', pkgs, ... }: {
-        packages.izumi = pkgs.callPackage ./default.nix { };
-        packages.default = self'.packages.izumi;
+        # packages.izumi = pkgs.callPackage ./default.nix { };
+        # packages.default = self'.packages.izumi;
         
-        checks = self'.packages.default.tests;
+        # checks = self'.packages.default.tests;
       };
     };
 }
